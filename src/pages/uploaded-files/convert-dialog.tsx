@@ -31,7 +31,8 @@ const ConvertDialog: React.FC<Props> = ({ showModal, setShowModal, item }) => {
   const [form] = Form.useForm();
 
   const onFinish = async (value: any) => {
-    const res = await UploadedFileApi.convert(item!.id, value);
+    await UploadedFileApi.convert(item!.id, value);
+    setShowModal(false);
   };
 
   useEffect(() => {

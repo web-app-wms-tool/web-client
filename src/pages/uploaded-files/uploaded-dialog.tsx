@@ -1,8 +1,7 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { InboxOutlined } from "@ant-design/icons";
 import type { UploadFile, UploadProps } from "antd";
 import {
-  message,
   Upload,
   Modal,
   Typography,
@@ -11,14 +10,11 @@ import {
   Row,
   Col,
   Select,
-  Checkbox,
 } from "antd";
-import { SRS, OBJECT_SELECTION } from "@/constant";
-import type { _SRS, _OBJECT_SELECTION } from "@/constant";
 import { sdk } from "@/api/axios";
 import { JsonToFormDataV2 } from "@/utils/json2formdata";
-import "./style.scss";
-import structuredClone from "@ungap/structured-clone";
+import { Srs } from "@/api/srs";
+import { DefaultOptionType } from "antd/es/select";
 
 const { Dragger } = Upload;
 
@@ -26,88 +22,98 @@ interface Props {
   showModal: boolean;
   setShowModal: (value: boolean) => void;
   setKeyRender: (value: number) => void;
+  srsList: Srs[];
 }
 
 const UploadDialog: React.FC<Props> = ({
   showModal,
   setShowModal,
   setKeyRender,
+  srsList,
 }) => {
   const { Title } = Typography;
   const [fileList, setFileList] = useState<UploadFile[]>([]);
-  // const [form] = Form.useForm();
+  const [form] = Form.useForm();
 
-  const uploadFiles = (e: any) => {
-    const { onSuccess, onError, file, onProgress } = e;
-    sdk
+  const [srsOptions, setSrsOptions] = useState<DefaultOptionType[]>([]);
+
+  useEffect(() => {
+    if (srsList && srsList.length > 0) {
+      setSrsOptions(
+        srsList.map((item) => ({ label: item.name, value: item.name }))
+      );
+    }
+  }, [srsList]);
+
+  const uploadProps: UploadProps = {
+    name: "file",
+    multiple: false,
+    accept: ".dwg,.dxf",
+    fileList: fileList,
+    beforeUpload: (uploadFile) => {
+      setFileList([uploadFile]);
+    },
+    customRequest: (options: any) => {
+      const { onSuccess } = options;
+      onSuccess();
+    },
+    onRemove: () => {
+      setFileList([]);
+    },
+    showUploadList: true,
+  };
+
+  const [disabled, setDisabled] = useState<boolean>(false);
+
+  const srs = Form.useWatch("srs", form);
+
+  useEffect(() => {
+    if (!fileList || fileList.length <= 0 || !srs) setDisabled(true);
+    else setDisabled(false);
+  }, [fileList?.[0], srs]);
+
+  const onDiscard = () => {
+    setShowModal(false);
+  };
+
+  useEffect(() => {
+    setFileList([]);
+    form.resetFields();
+  }, [showModal]);
+
+  const onFinish = async (value: any) => {
+    setFileList((state) => {
+      state[0].status = "uploading";
+      return [...state];
+    });
+    await sdk
       .post(
         "uploaded-files",
-        JsonToFormDataV2({
-          file: file,
-        }),
+        JsonToFormDataV2({ file: fileList[0], ...value }),
         {
           headers: { "Content-Type": "multipart/form-data" },
           onUploadProgress: (event) => {
-            onProgress(
-              { percent: (event.loaded / (event.total || 1)) * 100 },
-              file
-            );
+            setFileList((state) => {
+              state[0].percent = (event.loaded / (event.total || 1)) * 100;
+              return [...state];
+            });
           },
         }
       )
       .then(() => {
         setFileList((state) => {
-          const index = state.findIndex((x) => x.uid === file.uid);
-          if (index >= 0) {
-            state[index].status = "done";
-          }
+          state[0].status = "done";
           return [...state];
         });
         setKeyRender(Math.random());
-        onSuccess(file);
+        setShowModal(false);
       })
-      .catch((error) => {
+      .catch((_error) => {
         setFileList((state) => {
-          const index = state.findIndex((x) => x.uid === file.uid);
-          if (index >= 0) {
-            state[index].status = "error";
-            state[index].error = error;
-          }
+          state[0].status = "error";
           return [...state];
         });
-        onError({ message: error.message });
       });
-  };
-
-  const uploadProps: UploadProps = {
-    name: "file",
-    multiple: true,
-    accept: ".dwg,.dxf",
-    fileList: fileList,
-    beforeUpload: (_uploadFile, _uploadFileList) => {
-      setFileList([...fileList, ..._uploadFileList]);
-    },
-    customRequest: uploadFiles,
-    onRemove: (file) => {
-      setFileList((state) => {
-        const tmpFileList: UploadFile[] = structuredClone(state);
-        const idx = tmpFileList.findIndex((item) => item.uid == file.uid);
-        tmpFileList.splice(idx, 1);
-        return tmpFileList;
-      });
-    },
-  };
-
-  // useEffect(() => {
-  //   form.setFieldsValue({
-  //     srs: SRS[2].value,
-  //     object_selection: OBJECT_SELECTION.map((item) => item.value),
-  //   });
-  // }, [showModal]);
-
-  const onDiscard = () => {
-    setShowModal(false);
-    setFileList([]);
   };
 
   return (
@@ -121,45 +127,41 @@ const UploadDialog: React.FC<Props> = ({
       <Title style={{ textAlign: "left" }} level={2}>
         Upload File
       </Title>
-      <Dragger {...uploadProps} className="upload">
-        <p className="ant-upload-drag-icon">
-          <InboxOutlined />
-        </p>
-        <p className="ant-upload-text">
-          Click or drag file to this area to upload
-        </p>
-        <p className="ant-upload-hint">Support for multiple files upload.</p>
-      </Dragger>
-      {/* <Form layout="vertical" onFinish={onFinish} form={form}>
-        <Row gutter={16}>
-          <Col span={24}>
-            <Form.Item>
-
-            </Form.Item>
-          </Col>
+      <Form layout="vertical" form={form} onFinish={onFinish}>
+        <Dragger {...uploadProps}>
+          <p className="ant-upload-drag-icon">
+            <InboxOutlined />
+          </p>
+          <p className="ant-upload-text">
+            Click or drag file to this area to upload
+          </p>
+          <p className="ant-upload-hint">
+            Support for only single file upload.
+          </p>
+        </Dragger>
+        <Row gutter={16} className="mt-4">
           <Col span={24}>
             <Form.Item
-              label="Coordinate Reference System"
               name="srs"
-              rules={[{ required: true, message: "Please select SRS" }]}
-            >
-              <Select options={SRS} placeholder="Coordinate Reference System" />
-            </Form.Item>
-          </Col>
-          <Col span={24}>
-            <Form.Item
-              label="Object Selection"
-              name="object_selection"
+              label="Coordinate Reference System"
               rules={[
-                { required: true, message: "Please select Object Selection" },
+                {
+                  required: true,
+                  message: "Please select Coordinate Reference System",
+                },
               ]}
             >
-              <Checkbox.Group options={OBJECT_SELECTION} />
+              <Select
+                options={srsOptions}
+                showSearch
+                allowClear
+                placeholder="Coordinate Reference System"
+              />
             </Form.Item>
           </Col>
         </Row>
 
-        <Form.Item className="mb-0">
+        <Form.Item name className="mb-0">
           <div
             style={{
               display: "flex",
@@ -171,16 +173,16 @@ const UploadDialog: React.FC<Props> = ({
               Cancel
             </Button>
             <Button
-              disabled={!file}
+              disabled={disabled}
               style={{ margin: "4px" }}
               htmlType="submit"
               type="primary"
             >
-              Convert
+              Upload
             </Button>
           </div>
         </Form.Item>
-      </Form> */}
+      </Form>
     </Modal>
   );
 };

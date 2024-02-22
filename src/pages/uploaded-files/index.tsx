@@ -3,7 +3,7 @@ import {
   DeleteOutlined,
   EditOutlined,
 } from "@ant-design/icons";
-import { FC, useState } from "react";
+import { FC, useEffect, useState } from "react";
 import { ActionField } from "@/interface/common";
 import BaseTable from "@/components/base-table";
 import { Button, Tooltip } from "antd";
@@ -17,6 +17,7 @@ import { useNavigate } from "react-router-dom";
 import { TbFileImport } from "react-icons/tb";
 import { CgExport } from "react-icons/cg";
 import ConvertDialog from "./convert-dialog";
+import { Srs, SrsApi } from "@/api/srs";
 
 const defaultColDef = {
   flex: 1,
@@ -32,6 +33,16 @@ const UploadedFilePage: FC = () => {
   const [valueSelected, setValueSelected] = useState<UploadedFile>();
   const navigate = useNavigate();
 
+  const [srsList, setSrsList] = useState<Srs[]>([]);
+
+  useEffect(() => {
+    const fetchSrsList = async () => {
+      const res = await SrsApi.list();
+      if (res.data.length > 0) setSrsList(res.data);
+    };
+    fetchSrsList();
+  }, []);
+
   const [keyRender, setKeyRender] = useState(0);
 
   const [columnDefs] = useState<ColDef<UploadedFile & ActionField>[]>([
@@ -46,6 +57,12 @@ const UploadedFilePage: FC = () => {
     {
       headerName: "File Name",
       field: "name",
+      sortable: true,
+      filter: "agTextColumnFilter",
+    },
+    {
+      headerName: "Coordinate Reference System",
+      field: "srs",
       sortable: true,
       filter: "agTextColumnFilter",
     },
@@ -114,6 +131,7 @@ const UploadedFilePage: FC = () => {
           showModal={showModal}
           setShowModal={setShowModal}
           setKeyRender={setKeyRender}
+          srsList={srsList}
         />
         <ConvertDialog
           showModal={showConvertModal}
