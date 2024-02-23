@@ -5,7 +5,6 @@ export interface Task {
   name: string;
   email: string;
   status: number;
-  status_full_text: string;
   start_at: Date;
   end_at: Date;
   error: string;
@@ -14,8 +13,8 @@ export interface Task {
   updated_at?: Date;
 }
 
-const TaskApi = {
-  //   list: (params?: any) => sdk.post("task-list", params),
+export const TaskApi = {
+  listAgGrid: (params?: any) => sdk.post("task-list", params),
 };
 
 export default TaskApi;

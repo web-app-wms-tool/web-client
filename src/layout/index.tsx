@@ -5,7 +5,7 @@ import NavBar from "./nav-bar";
 import { Outlet } from "react-router-dom";
 import { PageLoading } from "@/pages/loading";
 import { Drawer, type MenuProps } from "antd";
-import { TbFileImport } from "react-icons/tb";
+import { TbFileImport, TbFileExport } from "react-icons/tb";
 import { FaTasks } from "react-icons/fa";
 
 const menu: MenuProps["items"] = [
@@ -13,6 +13,11 @@ const menu: MenuProps["items"] = [
     label: "Uploaded Files",
     key: "uploaded-files",
     icon: <TbFileImport size="20" />,
+  },
+  {
+    label: "Converted Files",
+    key: "converted-files",
+    icon: <TbFileExport size="20" />,
   },
   {
     label: "Tasks",

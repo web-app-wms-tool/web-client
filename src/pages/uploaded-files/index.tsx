@@ -125,7 +125,6 @@ const UploadedFilePage: FC = () => {
           api={UploadedFileApi.listAgGrid}
           key={keyRender}
           gridOption={{ defaultColDef: defaultColDef }}
-          defaultParams={{ with: ["lots", "details"] }}
         ></BaseTable>
         <UploadDialog
           showModal={showModal}

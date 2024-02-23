@@ -4,3 +4,4 @@ export function getBackEndUrl() {
 export * from "./_type";
 export * from "./_color";
 export * from "./_config";
+export * from "./_status";
