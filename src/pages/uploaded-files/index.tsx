@@ -136,6 +136,7 @@ const UploadedFilePage: FC = () => {
           showModal={showConvertModal}
           setShowModal={setShowConvertModal}
           item={valueSelected}
+          srsList={srsList}
         />
       </PageContainer>
     </>

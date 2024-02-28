@@ -15,20 +15,37 @@ import {
   Input,
   InputNumber,
 } from "antd";
-import { SRS, OBJECT_SELECTION, OUTPUT_TYPE } from "@/constant";
-import type { _SRS, _OBJECT_SELECTION, _OUTPUT_TYPE } from "@/constant";
+import { OBJECT_SELECTION, OUTPUT_TYPE } from "@/constant";
 import { type UploadedFile, UploadedFileApi } from "@/api/uploaded-file";
 import { handleNumberPress } from "@/utils/helper";
+import { Srs } from "@/api/srs";
+import { DefaultOptionType } from "antd/es/select";
 
 interface Props {
   showModal: boolean;
   setShowModal: (value: boolean) => void;
   item?: UploadedFile;
+  srsList: Srs[];
 }
 
-const ConvertDialog: React.FC<Props> = ({ showModal, setShowModal, item }) => {
+const ConvertDialog: React.FC<Props> = ({
+  showModal,
+  setShowModal,
+  item,
+  srsList,
+}) => {
   const { Title } = Typography;
   const [form] = Form.useForm();
+
+  const [srsOptions, setSrsOptions] = useState<DefaultOptionType[]>([]);
+
+  useEffect(() => {
+    if (srsList && srsList.length > 0) {
+      setSrsOptions(
+        srsList.map((item) => ({ label: item.name, value: item.name }))
+      );
+    }
+  }, [srsList]);
 
   const onFinish = async (value: any) => {
     await UploadedFileApi.convert(item!.id, value);
@@ -36,11 +53,11 @@ const ConvertDialog: React.FC<Props> = ({ showModal, setShowModal, item }) => {
   };
 
   useEffect(() => {
+    form.resetFields();
     form.setFieldsValue({
-      srs: SRS[2].value,
       geometry_types: item?.metadata?.geometry_types,
       layers: item?.metadata?.layers,
-      output_type: OUTPUT_TYPE[2].value,
+      output_type: OUTPUT_TYPE[0].value,
       min_x: item?.metadata?.bbox?.[0] ?? undefined,
       min_y: item?.metadata?.bbox?.[1] ?? undefined,
       max_x: item?.metadata?.bbox?.[2] ?? undefined,
@@ -71,7 +88,12 @@ const ConvertDialog: React.FC<Props> = ({ showModal, setShowModal, item }) => {
               name="srs"
               rules={[{ required: true, message: "Please select SRS" }]}
             >
-              <Select options={SRS} placeholder="Coordinate Reference System" />
+              <Select
+                options={srsOptions}
+                placeholder="Coordinate Reference System"
+                showSearch
+                allowClear
+              />
             </Form.Item>
           </Col>
           <Col span={24}>
@@ -108,15 +130,6 @@ const ConvertDialog: React.FC<Props> = ({ showModal, setShowModal, item }) => {
                 showSearch
                 placeholder="Layer"
               />
-            </Form.Item>
-          </Col>
-          <Col span={24}>
-            <Form.Item
-              label="Output Type"
-              name="output_type"
-              rules={[{ required: true, message: "Please select Output type" }]}
-            >
-              <Select options={OUTPUT_TYPE} placeholder="Output Type" />
             </Form.Item>
           </Col>
           <Col span={24}>
