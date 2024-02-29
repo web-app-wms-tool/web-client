@@ -10,6 +10,7 @@ import { useAppDispatch } from "@/stores/hook";
 
 const NotFound = lazy(() => import("@/pages/404"));
 const UploadedFilePage = lazy(() => import("@/pages/uploaded-files"));
+const ConvertedLayerPage = lazy(() => import("@/pages/converted-layers"));
 const TaskPage = lazy(() => import("@/pages/tasks"));
 
 const routeList: RouteObject[] = [
@@ -24,6 +25,10 @@ const routeList: RouteObject[] = [
       {
         path: "uploaded-files",
         element: <UploadedFilePage />,
+      },
+      {
+        path: "converted-files",
+        element: <ConvertedLayerPage />,
       },
       {
         path: "tasks",

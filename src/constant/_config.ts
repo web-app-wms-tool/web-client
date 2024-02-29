@@ -1,20 +1,3 @@
-export type _SRS = "EPSG:6991" | "EPSG:2039" | "EPSG:4326";
-
-export const SRS = [
-  {
-    label: "EPSG:6991",
-    value: "EPSG:6991",
-  },
-  {
-    label: "EPSG:2039",
-    value: "EPSG:2039",
-  },
-  {
-    label: "EPSG:4326",
-    value: "EPSG:4326",
-  },
-];
-
 export type _OBJECT_SELECTION =
   | "POINT"
   | "LINE"

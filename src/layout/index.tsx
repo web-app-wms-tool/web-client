@@ -15,7 +15,7 @@ const menu: MenuProps["items"] = [
     icon: <TbFileImport size="20" />,
   },
   {
-    label: "Converted Files",
+    label: "Converted Layers",
     key: "converted-files",
     icon: <TbFileExport size="20" />,
   },
