@@ -93,7 +93,7 @@ const UploadedFilePage: FC = () => {
       filter: false,
       cellRenderer: ActionCellRender,
       cellRendererParams: {
-        onShowItem: (item: UploadedFile) => {
+        onConvertItem: (item: UploadedFile) => {
           setValueSelected(item);
           setShowConvertModal(true);
         },
@@ -143,7 +143,7 @@ const UploadedFilePage: FC = () => {
   );
 };
 export default UploadedFilePage;
-const ActionCellRender: FC<any> = ({ onShowItem, onDeleteItem, data }) => {
+const ActionCellRender: FC<any> = ({ onConvertItem, onDeleteItem, data }) => {
   if (!data) return <></>;
   return (
     <div className="px-1">
@@ -153,7 +153,7 @@ const ActionCellRender: FC<any> = ({ onShowItem, onDeleteItem, data }) => {
           shape="circle"
           icon={<CgExport />}
           type="text"
-          onClick={() => onShowItem(data)}
+          onClick={() => onConvertItem(data)}
         />
       </Tooltip>
       <Tooltip placement="bottomLeft" title="Delete File">

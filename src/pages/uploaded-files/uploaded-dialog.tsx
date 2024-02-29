@@ -161,7 +161,7 @@ const UploadDialog: React.FC<Props> = ({
           </Col>
         </Row>
 
-        <Form.Item name className="mb-0">
+        <Form.Item className="mb-0">
           <div
             style={{
               display: "flex",
