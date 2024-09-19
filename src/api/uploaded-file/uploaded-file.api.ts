@@ -22,10 +22,8 @@ export interface UploadedFile {
 
 export const UploadedFileApi = {
   listAgGrid: (params?: any) => sdk.post("uploaded-file-list", params),
-  update: (id: string | number, data: UploadedFile) =>
-    sdk.post(`uploaded-file/${id}`, data),
   convert: (id: string | number, params: any) =>
-    sdk.post(`uploaded-file/${id}/convert`, params),
+    sdk.post(`uploaded-files/${id}/convert`, params),
 };
 
 export default UploadedFileApi;

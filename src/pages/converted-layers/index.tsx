@@ -1,7 +1,7 @@
 import {
   DownloadOutlined,
   DeleteOutlined,
-  EditOutlined,
+  ReloadOutlined,
 } from "@ant-design/icons";
 import { FC, useEffect, useState } from "react";
 import { ActionField } from "@/interface/common";
@@ -15,6 +15,7 @@ import DeleteDialog from "@/components/dialog/deleteDialog";
 import { useNavigate } from "react-router-dom";
 import { TbFileImport } from "react-icons/tb";
 import { Srs, SrsApi } from "@/api/srs";
+import DownloadDialog from "./download-dialog";
 
 const defaultColDef = {
   flex: 1,
@@ -25,7 +26,7 @@ const defaultColDef = {
 };
 const ConvertedLayerPage: FC = () => {
   const [showModal, setShowModal] = useState<boolean>(false);
-  const [showConvertModal, setShowConvertModal] = useState<boolean>(false);
+  const [showDownloadModal, setShowDownloadModal] = useState<boolean>(false);
   const [statusModalDelete, setStatusModalDelete] = useState(false);
   const [valueSelected, setValueSelected] = useState<ConvertedLayer>();
   const navigate = useNavigate();
@@ -84,8 +85,9 @@ const ConvertedLayerPage: FC = () => {
       filter: false,
       cellRenderer: ActionCellRender,
       cellRendererParams: {
-        onDowloadItem: (item: ConvertedLayer) => {
+        onDownloadItem: (item: ConvertedLayer) => {
           setValueSelected(item);
+          setShowDownloadModal(true);
         },
         onDeleteItem: (item: ConvertedLayer) => {
           setValueSelected(item);
@@ -99,15 +101,15 @@ const ConvertedLayerPage: FC = () => {
     <>
       <PageContainer
         icon={<TbFileImport />}
-        title="Uploaded Files"
+        title="Layers"
         extraTitle={
           <Button
-            type="primary"
-            onClick={() => setShowModal(true)}
+            onClick={() => {}}
+            icon={<ReloadOutlined />}
+            shape="circle"
+            type="text"
             style={{ float: "right", height: "2.5rem" }}
-          >
-            Upload File
-          </Button>
+          />
         }
       >
         <BaseTable
@@ -116,6 +118,11 @@ const ConvertedLayerPage: FC = () => {
           key={keyRender}
           gridOption={{ defaultColDef: defaultColDef }}
         ></BaseTable>
+        <DownloadDialog
+          showModal={showDownloadModal}
+          setShowModal={setShowDownloadModal}
+          item={valueSelected}
+        />
       </PageContainer>
     </>
   );
